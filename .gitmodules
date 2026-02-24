@@ -1,0 +1,8 @@
+[submodule "claude-scholar"]
+	path = claude-scholar
+	url = https://github.com/shanraisshan/claude-code-best-practice.git
+	branch = main
+[submodule "deep-research"]
+	path = deep-research
+	url = https://github.com/anthropics/skills.git
+	branch = main
