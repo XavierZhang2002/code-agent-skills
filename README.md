@@ -11,17 +11,17 @@ Personal collection of Claude Code skills for AI-assisted development.
 | `project-doc-management` | Document management | [📖 Documentation](docs/project-doc-management.md) |
 | `project-dev-checklist` | Development checklist | [📖 Documentation](docs/project-dev-checklist.md) |
 
-**项目文档管理** (`project-doc-management`): 
-- 强制项目文档位置规范（AGENTS.md, docs/, notes/）
-- 支持多轮次持续开发，不丢失上下文
-- 保护原始需求不被偏离
-- 文档生命周期管理
+**Project Document Management** (`project-doc-management`):
+- Enforces standardized project document locations (AGENTS.md, docs/, notes/)
+- Supports multi-session continuous development without losing context
+- Protects original requirements from deviation
+- Document lifecycle management
 
-**开发检查清单** (`project-dev-checklist`):
-- 记录开发环境配置（Python版本、依赖）
-- 追踪测试状态和覆盖率
-- 版本管理和API兼容性检查
-- 提交前质量检查
+**Development Checklist** (`project-dev-checklist`):
+- Records development environment configuration (Python version, dependencies)
+- Tracks test status and coverage
+- Version management and API compatibility checking
+- Pre-commit quality checks
 
 ### Third-Party Skills
 
@@ -47,7 +47,7 @@ python ~/.config/agents/skills/project-doc-management/scripts/init-project.py "P
 # Or say to Claude: "init project"
 ```
 
-[详细文档 →](docs/project-doc-management.md)
+[Detailed Documentation →](docs/project-doc-management.md)
 
 ### 2. Development Checklist
 
@@ -58,7 +58,7 @@ python ~/.config/agents/skills/project-dev-checklist/scripts/record-dev-status.p
 # Or say to Claude: "env check", "test check", "commit ready"
 ```
 
-[详细文档 →](docs/project-dev-checklist.md)
+[Detailed Documentation →](docs/project-dev-checklist.md)
 
 ## Installation
 
@@ -87,40 +87,40 @@ cp -r /tmp/claude-skills/* ~/.config/agents/skills/
 
 ```
 .skills/
-├── docs/                           # 文档说明
-│   ├── project-doc-management.md   # 文档管理 skill 说明
-│   └── project-dev-checklist.md    # 开发清单 skill 说明
-├── project-doc-management/         # 自定义 - 文档管理
+├── docs/                           # Documentation
+│   ├── project-doc-management.md   # Document management skill docs
+│   └── project-dev-checklist.md    # Development checklist skill docs
+├── project-doc-management/         # Custom - Document management
 │   ├── SKILL.md
 │   ├── README.md
 │   ├── scripts/
 │   └── templates/
-├── project-dev-checklist/          # 自定义 - 开发清单
+├── project-dev-checklist/          # Custom - Development checklist
 │   ├── SKILL.md
 │   ├── README.md
 │   ├── scripts/
 │   └── templates/
-└── ...                             # 其他 skills
+└── ...                             # Other skills
 ```
 
 ## Workflow: Two Skills Working Together
 
 ```
 1. Start Session
-   ├─ project-doc-management → 读取 AGENTS.md，了解项目状态
-   └─ project-dev-checklist  → 检查开发环境，验证测试
+   ├─ project-doc-management → Read AGENTS.md, understand project status
+   └─ project-dev-checklist  → Check development environment, verify tests
 
 2. Development
-   ├─ 编写代码
-   └─ project-dev-checklist  → 提醒运行测试
+   ├─ Write code
+   └─ project-dev-checklist  → Remind to run tests
 
 3. Pre-commit
-   ├─ project-dev-checklist  → 代码质量检查
-   └─ 运行测试套件
+   ├─ project-dev-checklist  → Code quality check
+   └─ Run test suite
 
 4. End Session
-   ├─ project-dev-checklist  → 记录开发状态
-   └─ project-doc-management → 更新 AGENTS.md 进度
+   ├─ project-dev-checklist  → Record development status
+   └─ project-doc-management → Update AGENTS.md progress
 ```
 
 ## Backup & Restore

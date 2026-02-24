@@ -1,63 +1,63 @@
 # Project Development Checklist
 
-## 简介
+## Overview
 
-`project-dev-checklist` 是一个轻量级的开发检查清单 skill，帮助开发者记录和管理开发环境、测试状态、版本信息，不干涉具体开发流程。
+`project-dev-checklist` is a lightweight development checklist skill that helps developers record and manage development environment, test status, and version information without interfering with specific development workflows.
 
-## 核心功能
+## Core Features
 
-### 1. 环境验证
-- **Python 版本**: 检查当前 Python 版本是否符合项目要求
-- **虚拟环境**: 确认 venv/conda 已激活
-- **依赖安装**: 验证所有依赖正确安装
-- **包导入测试**: 确保可以正常导入项目包
+### 1. Environment Verification
+- **Python Version**: Check if current Python version meets project requirements
+- **Virtual Environment**: Confirm venv/conda is activated
+- **Dependencies**: Verify all dependencies are correctly installed
+- **Package Import Test**: Ensure project package can be imported normally
 
-### 2. 测试管理
-- **测试执行**: 记录测试运行状态和结果
-- **覆盖率追踪**: 跟踪代码覆盖率变化
-- **测试环境**: 记录测试配置和环境要求
-- **测试缺口**: 标记未覆盖的测试场景
+### 2. Test Management
+- **Test Execution**: Record test run status and results
+- **Coverage Tracking**: Track code coverage changes
+- **Test Environment**: Record test configuration and environment requirements
+- **Test Gaps**: Mark uncovered test scenarios
 
-### 3. 版本管理
-- **包版本**: 当前版本号和发布计划
-- **API 兼容性**: 记录 API 变更和兼容性
-- **依赖约束**: 依赖版本管理和安全审计
+### 3. Version Management
+- **Package Version**: Current version and release plans
+- **API Compatibility**: Record API changes and compatibility
+- **Dependency Constraints**: Dependency version management and security audit
 
-### 4. 提交前检查
-- **代码质量**: 格式化、linting、类型检查
-- **调试代码**: 检查并移除 print/pdb 等调试代码
-- **安全检查**: 扫描 API 密钥、密码等敏感信息
+### 4. Pre-Commit Checks
+- **Code Quality**: Formatting, linting, type checking
+- **Debug Code**: Check and remove print/pdb debug code
+- **Security Scan**: Scan for API keys, passwords, and other sensitive info
 
-## 记录的检查点
+## Recorded Checkpoints
 
-### 开发前检查
+### Pre-Development Check
 ```markdown
-- [ ] Python 版本正确
-- [ ] 虚拟环境已激活
-- [ ] 依赖已安装
-- [ ] 包可以正常导入
-- [ ] 已阅读 AGENTS.md
+- [ ] Python version correct
+- [ ] Virtual environment activated
+- [ ] Dependencies installed
+- [ ] Package imports correctly
+- [ ] Read AGENTS.md
 ```
 
-### 开发中检查
+### During Development Check
 ```markdown
-- [ ] 频繁运行测试
-- [ ] 遵循现有代码模式
-- [ ] 依赖已正确添加
+- [ ] Running tests frequently
+- [ ] Following existing code patterns
+- [ ] Dependencies properly added
 ```
 
-### 提交前检查
+### Pre-Commit Check
 ```markdown
-- [ ] 所有测试通过
-- [ ] 无调试代码残留
-- [ ] 无敏感信息泄露
-- [ ] 代码格式化完成
-- [ ] AGENTS.md 已更新
+- [ ] All tests passing
+- [ ] No debug code残留
+- [ ] No sensitive info leaked
+- [ ] Code formatting completed
+- [ ] AGENTS.md updated
 ```
 
-## 开发状态记录
+## Development Status Recording
 
-运行 `record-dev-status.py` 会自动在 AGENTS.md 中添加：
+Running `record-dev-status.py` automatically adds to AGENTS.md:
 
 ```markdown
 ## Development Status
@@ -77,24 +77,24 @@ ruff format src/
 ```
 ```
 
-## 使用方法
+## Usage
 
-### 自然语言触发
-- `"env check"` - 环境检查
-- `"test check"` - 测试检查
-- `"version check"` - 版本检查
-- `"commit ready"` - 提交前检查
-- `"record dev status"` - 自动记录到 AGENTS.md
+### Natural Language Triggers
+- `"env check"` - Environment check
+- `"test check"` - Test check
+- `"version check"` - Version check
+- `"commit ready"` - Pre-commit check
+- `"record dev status"` - Automatically record to AGENTS.md
 
-### 手动记录
+### Manual Recording
 ```bash
 cd /your/project
 python ~/.config/agents/skills/project-dev-checklist/scripts/record-dev-status.py
 ```
 
-## 测试状态追踪
+## Test Status Tracking
 
-建议定期更新测试状态表格：
+Recommended to regularly update test status table:
 
 ```markdown
 | Test Suite | Status | Coverage | Notes |
@@ -109,49 +109,49 @@ Known test gaps:
 - [ ] Concurrent access scenarios
 ```
 
-## 与 project-doc-management 配合
+## Integration with project-doc-management
 
-这两个 skill 是互补的：
+These two skills are complementary:
 
-| Skill | 职责 |
-|-------|------|
-| `project-doc-management` | 管理文档放在哪里 (WHERE) |
-| `project-dev-checklist` | 检查开发中的什么 (WHAT) |
+| Skill | Responsibility |
+|-------|---------------|
+| `project-doc-management` | Manage WHERE documents go |
+| `project-dev-checklist` | Check WHAT during development |
 
-### 完整工作流
+### Complete Workflow
 
 ```
 1. Start
-   └─ project-doc-management: 读取 AGENTS.md
-   └─ project-dev-checklist: 检查环境
+   ├─ project-doc-management → Read AGENTS.md, understand project status
+   └─ project-dev-checklist  → Check development environment
 
-2. Develop
-   └─ 编写代码
-   └─ project-dev-checklist: 提醒运行测试
+2. Development
+   ├─ Write code
+   └─ project-dev-checklist  → Remind to run tests
 
 3. Pre-commit
-   └─ project-dev-checklist: 质量检查
-   └─ 运行测试
+   ├─ project-dev-checklist  → Quality check
+   └─ Run test suite
 
 4. End
-   └─ project-dev-checklist: 记录状态
-   └─ project-doc-management: 更新 AGENTS.md
+   ├─ project-dev-checklist  → Record status
+   └─ project-doc-management → Update AGENTS.md progress
 ```
 
-## 设计理念
+## Design Philosophy
 
-- **轻量级**: 只提供检查清单，不强制流程
-- **可跳过**: 不适用的检查可以跳过
-- **可适应**: 根据项目需要调整检查项
-- **记录优先**: 重点是记录状态，而非强制执行
+- **Lightweight**: Only provides checklist, no forced process
+- **Skippable**: Checks that don't apply can be skipped
+- **Adaptable**: Adjust checklist items based on project needs
+- **Record First**: Focus on recording status, not enforcement
 
-## 常见问题
+## FAQ
 
-**Q: 这个 skill 会强制我如何写代码吗？**
-A: 不会。它只提醒你检查什么，具体如何开发完全由你决定。
+**Q: Will this skill force me how to write code?**
+A: No. It only reminds you what to check, specific development is completely up to you.
 
-**Q: 我可以跳过某些检查吗？**
-A: 可以。这是检查清单，不是强制流程。
+**Q: Can I skip certain checks?**
+A: Yes. This is a checklist, not a forced process.
 
-**Q: 如何知道测试覆盖率是否足够？**
-A: skill 不会告诉你"足够"的标准，只帮你记录当前覆盖率。
+**Q: How do I know if test coverage is sufficient?**
+A: The skill won't tell you "sufficient" standards, only helps record current coverage.
