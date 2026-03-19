@@ -1,163 +1,92 @@
 ---
 name: arxiv-research
-description: Search, fetch, and summarize arXiv papers. Use when the user wants to find academic papers on a specific topic, get paper summaries, track latest research, or extract key insights from arXiv. Triggers: "search arxiv", "find papers about", "summarize arxiv paper", "latest research on", "arxiv daily digest", "paper summary".
+description: Free academic paper research using arXiv API. Search, summarize, and analyze latest AI/ML papers without requiring API keys. Use when you need to research academic literature, find relevant papers, summarize paper content, or track latest research trends on arXiv.
 ---
 
-# arXiv Research Assistant
+# arXiv Research Skill
 
-A comprehensive skill for searching, retrieving, and analyzing academic papers from arXiv.
+Free academic paper research using arXiv's open API. No API keys required!
 
 ## Capabilities
 
-1. **Search Papers**: Query arXiv by keywords, authors, categories
-2. **Fetch Metadata**: Get title, abstract, authors, publication date, categories
-3. **Download PDFs**: Retrieve full-text PDFs for deep analysis
-4. **Generate Summaries**: Create structured summaries of papers
-5. **Track Updates**: Monitor specific categories for new papers
+- Search papers by keywords, authors, or categories
+- Download and summarize paper abstracts
+- Track latest papers in specific fields
+- Generate literature reviews from multiple papers
+- Extract key insights and citations
 
-## Workflow
+## Usage
 
 ### 1. Search Papers
 
-Use arXiv API to search for papers:
+Use the arXiv API to search for papers:
 
 ```bash
-# Search by keyword
-curl "http://export.arxiv.org/api/query?search_query=all:<KEYWORD>&start=0&max_results=10&sortBy=submittedDate&sortOrder=descending"
+# Search by keywords
+python3 ~/.claude/skills/arxiv-research/scripts/search.py --query "transformer architecture" --max-results 10
 
-# Search specific category (e.g., cs.AI, cs.LG, cs.CL)
-curl "http://export.arxiv.org/api/query?search_query=cat:cs.AI&start=0&max_results=20&sortBy=submittedDate&sortOrder=descending"
+# Search by category (cs.AI = Artificial Intelligence)
+python3 ~/.claude/skills/arxiv-research/scripts/search.py --category cs.AI --date-from 2025-01-01 --max-results 20
 
-# Advanced search with multiple terms
-curl "http://export.arxiv.org/api/query?search_query=all:<TERM1>+AND+all:<TERM2>&start=0&max_results=10"
+# Search with multiple filters
+python3 ~/.claude/skills/arxiv-research/scripts/search.py --query "multi-agent" --category cs.MA --sort-by submittedDate --max-results 15
 ```
 
-Common arXiv categories:
-- `cs.AI` - Artificial Intelligence
-- `cs.LG` - Machine Learning
-- `cs.CL` - Computation and Language (NLP)
-- `cs.CV` - Computer Vision
-- `cs.IR` - Information Retrieval
-- `cs.DB` - Databases
-- `cs.SE` - Software Engineering
+### 2. Get Paper Details
 
-### 2. Parse Response
-
-The arXiv API returns Atom XML format. Extract:
-- `<title>` - Paper title
-- `<summary>` - Abstract
-- `<author><name>` - Authors
-- `<published>` - Publication date
-- `<link rel="alternate">` - arXiv page URL
-- `<link rel="related" title="pdf">` - PDF URL
-- `<category term="">` - Categories
-
-### 3. Generate Summary Structure
-
-For each paper, create:
-
-```markdown
-## Paper Title
-
-**Authors**: [Author list]
-**Published**: [Date]
-**Categories**: [Categories]
-**arXiv URL**: [Link]
-**PDF URL**: [Link]
-
-### Executive Summary (3-5 sentences)
-[Core contribution in plain language]
-
-### Key Contributions
-1. [Contribution 1]
-2. [Contribution 2]
-3. [Contribution 3]
-
-### Methodology
-[Brief description of approach/methods]
-
-### Key Findings/Results
-[Main results or findings]
-
-### Relevance Assessment
-- **Novelty**: [1-5] - How novel is the contribution?
-- **Impact Potential**: [1-5] - Potential influence on the field
-- **Technical Quality**: [1-5] - Rigor of methodology
-- **Clarity**: [1-5] - Quality of writing and presentation
-
-### Limitations & Gaps (from abstract)
-[What the authors acknowledge as limitations]
-
-### Connection to User's Interest
-[How this relates to the specific research context]
+```bash
+# Get detailed info about specific papers
+python3 ~/.claude/skills/arxiv-research/scripts/search.py --id 2601.01743,2601.02749
 ```
 
-## Output Formats
+### 3. Generate Literature Review
 
-### Daily Digest Format
-```markdown
-# arXiv Daily Digest - [Date] - [Category/Topic]
-
-## Research Highlights (Top 5)
-[Most important papers with full summaries]
-
-## Trending Topics
-[Emerging themes from today's papers]
-
-## Quick Scan (Other Papers)
-[Brief 1-line summaries of remaining papers]
-
-## Statistics
-- Total papers: [N]
-- High relevance: [N]
-- New methods: [N]
-- Experimental papers: [N]
+```bash
+# Auto-generate literature review from search results
+python3 ~/.claude/skills/arxiv-research/scripts/search.py --query "AI Agent" --category cs.AI --max-results 20 --output review.md
 ```
 
-### Literature Review Format
-```markdown
-# Literature Review: [Topic]
+## arXiv Categories for AI/ML Research
 
-## Overview
-[Executive summary of the field]
+- **cs.AI** - Artificial Intelligence
+- **cs.LG** - Machine Learning
+- **cs.CL** - Computation and Language (NLP)
+- **cs.CV** - Computer Vision
+- **cs.MA** - Multiagent Systems
+- **cs.IR** - Information Retrieval
+- **cs.DB** - Databases
+- **cs.SE** - Software Engineering
+- **stat.ML** - Statistics - Machine Learning
 
-## Categorization of Papers
+## Search Tips
 
-### Category 1: [Theme]
-[Papers grouped by theme with synthesis]
+1. **Use specific keywords**: "transformer attention mechanism" > "deep learning"
+2. **Combine with categories**: Always specify a category for better results
+3. **Sort by date**: Use `--sort-by submittedDate` for latest papers
+4. **Date filtering**: Use `--date-from YYYY-MM-DD` for recent papers
 
-### Category 2: [Theme]
-...
+## Alternative: Direct Web Search
 
-## Research Timeline
-[Chronological development of ideas]
+For broader research beyond arXiv, use Kimi's built-in web search:
+- Simply ask: "Search for latest papers on [topic]"
+- Or: "Research the current state of [field]"
 
-## Current State of the Art
-[Best performing methods/approaches]
+## Examples
 
-## Identified Research Gaps
-1. [Gap 1] - [Evidence from papers]
-2. [Gap 2] - [Evidence from papers]
-3. [Gap 3] - [Evidence from papers]
+```bash
+# Find latest agent papers
+python3 ~/.claude/skills/arxiv-research/scripts/search.py --query "AI Agent" --category cs.AI --date-from 2025-01-01 --max-results 10
 
-## Future Directions
-[Emerging trends and opportunities]
+# Find RAG-related papers
+python3 ~/.claude/skills/arxiv-research/scripts/search.py --query "retrieval augmented generation" --category cs.CL --max-results 15
 
-## Reference List
-[Full citations with links]
+# Find papers by specific topic
+python3 ~/.claude/skills/arxiv-research/scripts/search.py --query "chain of thought reasoning" --category cs.LG --sort-by relevance
 ```
 
-## Best Practices
+## Notes
 
-1. **Always verify PDF accessibility** before promising full-text analysis
-2. **Check publication dates** to ensure recency
-3. **Cross-reference** multiple papers on same topic
-4. **Note methodology quality** - experimental vs theoretical
-5. **Highlight reproducibility** - code/data availability
-6. **Track citation counts** when available (via Semantic Scholar if needed)
-
-## Tools & Resources
-
-- arXiv API: http://export.arxiv.org/api/query
-- arXiv Categories: https://arxiv.org/category_taxonomy
-- Rate limit: ~1 request per 3 seconds recommended
+- arXiv API is rate-limited to reasonable usage (no key required)
+- Returns abstracts and metadata (not full PDFs)
+- For full papers, visit the provided arXiv links
+- Respect arXiv's terms of service
