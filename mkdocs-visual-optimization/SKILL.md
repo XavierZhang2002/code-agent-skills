@@ -1,212 +1,340 @@
 ---
 name: mkdocs-visual-optimization
 description: >
-  Comprehensive visual optimization for MkDocs Material theme documentation sites.
-  Transform plain markdown into rich, visually structured docs using admonitions,
-  content tabs, Mermaid diagrams, grid cards, and collapsible sections.
-  Use when: (1) user asks to optimize or improve the visual appearance of MkDocs docs,
+  Comprehensive structural and visual optimization for MkDocs Material theme documentation sites.
+  Covers metadata (front matter, tags), structural cleanup (heading numbering, navigation),
+  and visual enhancement (admonitions, content tabs, Mermaid diagrams, grid cards).
+  Use when: (1) user asks to optimize or improve MkDocs docs appearance or structure,
   (2) user wants to convert plain markdown to use MkDocs Material features,
-  (3) user asks about MkDocs Material best practices for visual structure,
-  (4) user wants to add admonitions, tabs, diagrams, or cards to their docs.
+  (3) user asks about MkDocs Material best practices,
+  (4) user wants to add admonitions, tabs, diagrams, or cards to their docs,
+  (5) user has split a large document into multiple files and needs cleanup.
   Triggers: "optimize mkdocs", "visual optimization", "mkdocs material", "add admonitions",
-  "convert to mermaid", "content tabs", "grid cards", "mkdocs beautify",
-  "美化文档", "优化文档", "添加告示框".
+  "convert to mermaid", "content tabs", "grid cards", "mkdocs beautify", "front matter",
+  "美化文档", "优化文档", "添加告示框", "文档规范".
 ---
 
-# MkDocs Material Visual Optimization — Skill Guide
+# MkDocs Material Optimization — Skill Guide
 
-Transform plain markdown into rich, visually structured documentation using MkDocs Material theme components. This skill covers what content can be optimized, what components are available, and best practices for applying them.
+Transform plain markdown into rich, well-structured documentation. This skill covers **structural optimization** (metadata, headings, navigation) and **visual enhancement** (admonitions, tabs, Mermaid, grid cards).
 
-## Prerequisites — Required mkdocs.yml Extensions
+## Priority Order (structural first, visual second)
 
-Before any visual optimization, ensure these extensions are enabled in `mkdocs.yml`:
+1. **Metadata**: Every page needs YAML front matter (title, description, tags)
+2. **Heading consistency**: Fix leftover section numbers from document splitting
+3. **Navigation config**: Enable key `theme.features` and plugins in `mkdocs.yml`
+4. **TL;DR summaries**: Long pages (>60 lines) get `!!! abstract` at the top
+5. **Visual components**: Admonitions, tabs, Mermaid, grid cards
+6. **Verify**: Build test or spot-check rendered output
+
+---
+
+## Prerequisites — mkdocs.yml Configuration
+
+### Required Markdown Extensions
 
 ```yaml
 markdown_extensions:
-  - admonition                    # admonition blocks
-  - pymdownx.details              # collapsible admonitions
-  - pymdownx.superfences:         # fenced code blocks + mermaid
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.tabbed:              # content tabs
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
       alternate_style: true
-  - attr_list                     # required for grid cards
-  - md_in_html                    # required for grid cards
-  - tables                        # enhanced tables
-  - pymdownx.emoji:               # Material icons
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
 ```
 
-> Note: `!!python/name:` YAML tags trigger LSP errors in editors but are valid MkDocs syntax at runtime. Ignore these warnings.
+> Note: `!!python/name:` YAML tags trigger LSP errors in editors but are valid MkDocs syntax at runtime.
+
+> **Mermaid theming caveat**: With `class: mermaid`, Material overrides all Mermaid colors via shadow DOM. For custom colors, use the custom integration in [Section 2.3](#23-mermaid-diagrams--custom-theming).
+
+### Recommended Theme Features
+
+Many projects miss these high-value features. Check and add as needed:
+
+```yaml
+theme:
+  features:
+    - navigation.tabs          # top-level sections as tabs
+    - navigation.sections      # bold section headers in sidebar
+    - navigation.expand        # auto-expand sidebar sections
+    - navigation.top           # back-to-top button
+    - navigation.footer        # previous/next page links at bottom
+    - navigation.path          # breadcrumb trail (e.g. Post-Training > Ch1 > GRPO)
+    - navigation.instant        # SPA mode — no full page reload
+    - navigation.instant.progress  # top loading bar during navigation
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+```
+
+| Feature | Impact | When Essential |
+|---------|--------|----------------|
+| `navigation.footer` | High | Linear reading flow (chapter → chapter) |
+| `navigation.path` | High | Deep nesting (3+ levels) |
+| `navigation.instant` | Medium | Any site — faster page transitions |
+| `content.code.copy` | Medium | Code-heavy documentation |
+
+### Recommended Plugins
+
+```yaml
+plugins:
+  - search
+  - tags        # enables tag-based cross-page navigation
+```
+
+The `tags` plugin reads `tags:` from each page's front matter and renders tag chips on pages. No extra config needed for basic usage.
+
+### .gitignore
+
+Ensure `site/` is in `.gitignore` — the `site/` directory is a build artifact that should not be committed:
+
+```
+site/
+```
 
 ---
 
-## 1. Admonitions — The Core Visual Tool
+## 1. Structural Optimization (do this before visual work)
+
+### 1.1 YAML Front Matter
+
+Every content page MUST have front matter. Without it, page titles degrade to filenames, social cards have no content, and tags don't work.
+
+```yaml
+---
+title: GRPO — RLVR 奠基算法
+description: Group Relative Policy Optimization 的核心机制、公式推导与工程实践
+tags:
+  - GRPO
+  - RLVR
+  - DeepSeek
+---
+```
+
+Rules:
+- `title`: Use the H1 heading text (with or without the section number prefix)
+- `description`: One natural sentence summarizing the page
+- `tags`: 2–4 relevant keywords; reuse tags across pages for cross-navigation
+- Index pages that already have front matter: add `tags` if missing
+
+### 1.2 Post-Split Heading Cleanup
+
+When a large document is split into multiple files, leftover section numbers in headings cause confusion. This is the **most common structural issue**.
+
+**Pattern to detect**: File is named `1.2-xxx.md` but contains headings like `## 2.1 ...`, `### 3.2 ...` — these "2.1" and "3.2" are remnants from the original document's structure.
+
+**Fix**: Remove the numeric prefix, keep the descriptive text.
+
+| Before | After |
+|--------|-------|
+| `## 2.1 RLHF 范式：从人类反馈中学习` | `## RLHF 范式：从人类反馈中学习` |
+| `### 3.2 SeeUPO — 首个多轮收敛保证` | `### SeeUPO — 首个多轮收敛保证` |
+
+**What to keep**: The H1 section number that matches the filename (e.g. `# 1.2 奖励信号` in `1.2-reward.md` is correct).
+
+**Audit method**: For each file, compare the filename number (e.g. `1.2`) against H2/H3 heading numbers. Any mismatch (e.g. `## 2.1` in a `1.2-*.md` file) is a leftover that needs removal.
+
+### 1.3 TL;DR Placement Strategy
+
+For pages >60 lines, add an abstract admonition right after the H1 heading:
+
+```markdown
+# Page Title
+
+!!! abstract "本节摘要"
+    1-3 sentence summary of this page's key content.
+
+!!! info "研究范围"
+    Existing metadata admonition...
+```
+
+Placement rules:
+- TL;DR goes **immediately after H1**, before any existing admonitions
+- If the page already opens with a concise summary paragraph or an `!!! info` that serves as a summary, skip the TL;DR to avoid redundancy
+- Keep summaries to 1–3 sentences; they should help readers decide whether to read further
+
+---
+
+## 2. Visual Components
+
+### 2.1 Admonitions — The Core Visual Tool
 
 Admonitions transform flat text into color-coded, semantically meaningful callout boxes.
 
-### 1.1 Syntax Forms
+**Syntax forms:**
 
-**Standard (always open):**
 ```markdown
-!!! type "Custom Title"
-    Content goes here.
-    All content must be indented 4 spaces.
+!!! type "Custom Title"        # always open
+    Content (4-space indent).
+
+??? type "Custom Title"        # collapsible, closed by default
+    Content (4-space indent).
+
+???+ type "Custom Title"       # collapsible, open by default
+    Content (4-space indent).
 ```
 
-**Collapsible (closed by default):**
-```markdown
-??? type "Custom Title"
-    Content goes here. Click to expand.
-```
-
-**Collapsible (open by default):**
-```markdown
-???+ type "Custom Title"
-    Content goes here. Already expanded, can be collapsed.
-```
-
-### 1.2 Available Types and Their Semantic Meaning
+**Available types and semantic meaning:**
 
 | Type | Color | Use For |
 |------|-------|---------|
 | `note` | Blue-grey | General notes, neutral information |
 | `info` | Blue | Scope definitions, metadata, background context |
-| `tip` | Green-teal | Navigation guides, recommendations, conclusions, selection advice |
-| `success` | Green | Strengths, key insights, positive findings, recommended practices |
-| `warning` | Orange | Limitations, caveats, disclaimers, items needing evaluation |
-| `danger` | Red | Anti-patterns, not-recommended items, things to avoid |
-| `example` | Purple | Academic dilemmas, case studies, illustrative scenarios |
-| `quote` | Light grey | Core insights, philosophical conclusions, notable quotes |
-| `abstract` | Blue-green | Citations, references, TL;DR summaries, academic sources |
-| `bug` | Red-pink | Known bugs, error conditions |
+| `tip` | Green-teal | Recommendations, conclusions, navigation guides |
+| `success` | Green | Strengths, key insights, positive findings |
+| `warning` | Orange | Limitations, caveats, disclaimers |
+| `danger` | Red | Anti-patterns, things to avoid |
+| `example` | Purple | Case studies, illustrative scenarios |
+| `quote` | Light grey | Notable quotes, philosophical conclusions |
+| `abstract` | Blue-green | TL;DR summaries, citations, references |
 | `question` | Green-teal | Open questions, discussion points |
-| `failure` | Red | Failed approaches, things that don't work |
+| `failure` | Red | Failed approaches |
 
-### 1.3 Content Rules Inside Admonitions
+**Content rules:**
+- **4-space indent** on every line inside the admonition
+- **Blank line** before the admonition and after its last line of content
+- **Arrow characters**: Use `--` instead of `→` inside admonitions to avoid rendering issues
+- **Code blocks inside**: 4-space indent before the backticks
+- Use at most **1–2 admonitions per screen**; do not wrap every paragraph
 
-- **4-space indent**: All content inside an admonition MUST be indented exactly 4 spaces
-- **Arrow characters**: Use `--` instead of the right arrow character inside admonitions to avoid rendering issues
-- **Blank lines**: Add a blank line before the admonition and after its content
-- **Nested content**: Lists, code blocks, and other markdown work inside admonitions (with proper indentation)
-- **Code blocks inside admonitions**: Need 4-space indent + the normal fence — total 4 spaces before the backticks
+### 2.2 Content Tabs — Parallel/Alternative Content
 
-```markdown
-!!! example "Code Inside Admonition"
-    Here is some code:
-
-    ```python
-    print("hello")
-    ```
-
-    And a list:
-
-    - Item one
-    - Item two
-```
-
----
-
-## 2. Content Tabs — Parallel/Alternative Content
-
-Use content tabs when you have parallel categories of information (e.g., multiple patterns, multiple languages, multiple tiers).
-
-### 2.1 Syntax
+Use tabs for true parallels (2–5 options). Never create a single tab.
 
 ```markdown
-=== "Tab Label 1"
-    Content for tab 1.
-    Must be indented 4 spaces.
+=== "Option A"
+    Content for A (4-space indent).
 
-=== "Tab Label 2"
-    Content for tab 2.
+=== "Option B"
+    Content for B.
 ```
-
-### 2.2 When to Use Content Tabs
 
 | Scenario | Example |
 |----------|---------|
-| Architectural patterns | `=== "Pattern 1: Router"`, `=== "Pattern 2: Agent"` |
-| Language comparisons | `=== "Python"`, `=== "JavaScript"` |
-| Security/deployment models | `=== "Model 1: Sandbox"`, `=== "Model 2: OAuth"` |
-| Tier-based predictions | `=== "Tier 1: Near-term"`, `=== "Tier 2: Mid-term"` |
-| Audience-specific recs | `=== "For Academia"`, `=== "For Industry"` |
-| Platform-specific instructions | `=== "macOS"`, `=== "Linux"`, `=== "Windows"` |
+| Architectural patterns | `=== "Pattern 1: Router"` / `=== "Pattern 2: Agent"` |
+| Language comparisons | `=== "Python"` / `=== "JavaScript"` |
+| Tier-based content | `=== "Tier 1: Near-term"` / `=== "Tier 2: Mid-term"` |
+| Platform-specific | `=== "macOS"` / `=== "Linux"` / `=== "Windows"` |
 
-### 2.3 Content Rules Inside Tabs
+**Content rules:**
+- 4-space indent for all content inside tabs
+- Blank line between the end of one tab's content and the next `===`
+- Avoid nesting tabs inside admonitions (requires 8-space indent, error-prone)
 
-- **4-space indent**: All content inside tabs MUST be indented 4 spaces
-- **Code blocks inside tabs**: Need 4-space indent + fence — total 4 spaces before backticks
-- **Blank line between tabs**: Always have a blank line between the end of one tab's content and the next `===`
-- **Tabs inside admonitions**: Possible but needs 8-space total indent (4 for admonition + 4 for tab content). Generally avoid this complexity.
+### 2.3 Mermaid Diagrams — Custom Theming
 
----
-
-## 3. Mermaid Diagrams — Replace ASCII Art
-
-Convert ASCII/text-based architecture diagrams to Mermaid for proper rendering.
-
-### 3.1 Syntax
+#### Basic syntax
 
 ````markdown
 ```mermaid
 flowchart LR
-    A[Client] --> B[Server]
-    B --> C[Database]
+    A[Input] --> B[Process]
+    B --> C[Output]
 ```
 ````
 
-### 3.2 Common Diagram Types
+**Common types:**
 
-**Flowchart (horizontal — architecture overviews):**
-```mermaid
-flowchart LR
-    A[Component A] --> B[Component B]
-    B --> C[Component C]
-    B --> D[Component D]
-```
+| Type | Direction | Use For |
+|------|-----------|---------|
+| `flowchart LR` | Left → Right | Architecture / system diagrams |
+| `flowchart TD` | Top → Down | Process / decision flows |
+| `sequenceDiagram` | — | Request/response interactions |
 
-**Flowchart (vertical — process flows):**
-```mermaid
-flowchart TD
-    A[Start] --> B{Decision}
-    B -->|Yes| C[Action 1]
-    B -->|No| D[Action 2]
-```
+**Core principle: diagrams must carry information that text alone cannot efficiently convey.** "简洁大方" refers to visual styling (colors, shapes), NOT to stripping information from labels. A diagram with rich, informative labels and clean styling is the goal.
 
-**Sequence diagram (interactions):**
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant S as Server
-    C->>S: Request
-    S-->>C: Response
-```
+**When to draw a diagram vs. use text:**
 
-### 3.3 Mermaid Best Practices
+| Draw a diagram | Use text instead |
+|----------------|-----------------|
+| Branching/merging logic (A→B, A→C) | Linear sequence (A→B→C) with ≤4 nodes and no branching |
+| Parallel/concurrent structures | Simple enumeration that a bullet list covers |
+| Feedback loops or cyclic dependencies | One-directional flow already described in prose |
+| Subgraph groupings that show system architecture | Trivial groupings with no structural insight |
 
-- Use `LR` (left-right) for architecture/system diagrams
-- Use `TD` (top-down) for process/flow diagrams
-- Keep node labels short — use subgraphs for grouping
-- Use `-->` for solid arrows, `-.->` for dashed, `==>` for thick
-- Use `{Decision}` for diamond decision nodes
-- Avoid special characters in node labels that Mermaid doesn't support; wrap labels in quotes if needed
+**If a diagram is just a linear chain of 3-4 nodes with no branching, and the surrounding text already says the same thing — delete the diagram.** It adds visual noise without information value.
 
----
+**Syntax best practices:**
+- `-->` solid, `-.->` dashed, `==>` thick arrows
+- `{Decision}` for diamond decision nodes; `([...])` for start/end
+- Wrap labels in double quotes if they contain special characters
+- Node labels should be **informative** (include key mechanism/metric), not just category names
+- Edge labels should carry **causal reasons** ("why this transition"), not just "next step"
 
-## 4. Grid Cards — Navigation Pages
+**Pitfalls to avoid (learned from production):**
+
+| Pitfall | Problem | Solution |
+|---------|---------|----------|
+| Emoji in node labels | Rendering breaks on some browsers/Mermaid versions | Use plain text only |
+| HTML tags in nodes | `<b>`, `<br>` depend on SVG foreignObject, unreliable | Use `\n` for line breaks instead |
+| Over-simplified labels | "DAPO" alone tells reader nothing | Add mechanism: `"DAPO\n非对称裁剪 + 动态采样"` |
+| Trivial linear chains | 3-node A→B→C duplicates surrounding text | Delete diagram, keep text |
+
+#### CRITICAL: Material's Mermaid CSS Override Problem
+
+Material wraps Mermaid in **shadow DOM** and injects CSS that **overrides all theme settings**. `%%{init}%%` directives, `extra.css`, and `!important` are all ineffective. Symptoms: gray subgraph backgrounds, unchangeable node colors.
+
+Confirmed by squidfunk in [#5681](https://github.com/squidfunk/mkdocs-material/issues/5681) and [#4582](https://github.com/squidfunk/mkdocs-material/discussions/4582).
+
+#### Solution: Custom Mermaid Integration
+
+Bypass Material's CSS by using a different fence class + your own Mermaid JS initialization. Three changes required:
+
+1. **Create `docs/javascripts/mermaid.mjs`** — imports Mermaid from CDN, calls `mermaid.initialize()` with your palette, renders `.mermaid-custom` elements. For the full template with 3 preset palettes (indigo/teal/neutral), see [mermaid-reference.md](mermaid-reference.md).
+
+2. **Update `mkdocs.yml`** — change fence class and add JS:
+    ```yaml
+    custom_fences:
+      - name: mermaid
+        class: mermaid-custom       # NOT "mermaid" — bypasses Material CSS
+        format: !!python/name:pymdownx.superfences.fence_code_format
+    extra_javascript:
+      - javascripts/mermaid.mjs     # must be listed
+    ```
+
+3. **Add CSS** in `extra.css` for `.mermaid-custom` (centering + responsive width).
+
+4. **Clean up** — remove all `%%{init}%%` directives from markdown. Theme is now global via JS.
+
+Key themeVariables for the subgraph gray-background fix: `clusterBkg` and `clusterBorder` (not `tertiaryColor`).
+
+#### Diagram design best practices
+
+| Principle | Bad | Good |
+|-----------|-----|------|
+| Information density | Bare labels: `DAPO`, `GRPO` | Informative: `"DAPO\n非对称裁剪 + 动态采样"` |
+| Edge labels | Empty or generic (`"next"`) | Causal: `"Critic 训练困难\n4 模型显存过高"` |
+| Node shapes | All rectangles `[...]` | Semantic: `([...])` start/end, `{...}` decision |
+| Subgraphs | Flat list of nodes | Group related steps with `subgraph` |
+| When to use TD vs LR | Always TD (tall) | TD for pipelines with many stages; LR for architecture/comparison |
+| Trivial diagrams | Draw A→B→C for everything | Delete if ≤4 linear nodes and text already covers it |
+
+### 2.4 Grid Cards — Navigation Pages
 
 Grid cards create a visual card layout for index/landing pages.
-
-### 4.1 Syntax
 
 ```markdown
 <div class="grid cards" markdown>
 
-- :material-icon-name: **Card Title**
+-   :material-flask:{ .lg .middle } **Card Title**
 
     ---
 
@@ -214,7 +342,7 @@ Grid cards create a visual card layout for index/landing pages.
 
     [:octicons-arrow-right-24: Link Text](./path/to/page.md)
 
-- :material-icon-name: **Card Title 2**
+-   :material-robot:{ .lg .middle } **Card Title 2**
 
     ---
 
@@ -225,137 +353,112 @@ Grid cards create a visual card layout for index/landing pages.
 </div>
 ```
 
-### 4.2 Rules
-
+**Rules:**
 - Requires `attr_list` and `md_in_html` extensions
-- The `markdown` attribute on the div is required for markdown rendering inside
-- Each card is a list item (`- `) with icon, title, separator (`---`), description, and link
-- Use Material Design Icons (`:material-*:`) or Octicons (`:octicons-*:`)
-- Grid cards are best for index pages, not for regular content pages
+- The `markdown` attribute on the `<div>` is required
+- **Always use `{ .lg .middle }` modifier** on icons for consistent sizing and vertical alignment
+- Keep card count reasonable (2–12); beyond 12, use a table or list instead
+- Grid cards are best for index/landing pages, not regular content
+
+**Consistency check:** If the main index uses `{ .lg .middle }`, all sub-index pages must use it too.
 
 ---
 
-## 5. Decision Tree — What To Optimize
+## 3. Decision Tree — What To Optimize
 
-Use this decision tree when scanning a markdown file for optimization opportunities:
+### 3.1 Structural Issues (check first)
 
-### 5.1 Blockquotes (`>`)
+| Issue | Detection | Action |
+|-------|-----------|--------|
+| Missing front matter | File doesn't start with `---` | Add title + description + tags |
+| Leftover heading numbers | H2/H3 number doesn't match filename | Remove numeric prefix |
+| Missing navigation features | `mkdocs.yml` lacks footer/path/instant | Add to theme.features |
+| `site/` committed to git | `site/` directory in repo | Add to .gitignore |
+| No tags plugin | `plugins:` section lacks `tags` | Add `- tags` to plugins |
 
-| Current Content | Transform To |
-|----------------|-------------|
-| TL;DR / summary blockquote | `!!! abstract "TL;DR"` |
-| Citation / reference blockquote | `??? abstract "Citation: Author (Year)"` (collapsible) |
-| Navigation guide blockquote | `!!! tip "Navigation"` |
-| Warning / caveat blockquote | `!!! warning "Title"` |
-| Philosophical quote | `!!! quote "Title"` |
-
-### 5.2 Plain Text Sections (headings followed by content)
+### 3.2 Content Transformation Rules
 
 | Current Content | Transform To |
 |----------------|-------------|
-| "Key Insights" / "Core Findings" | `!!! success "Key Insights"` |
-| "Limitations" / "Weaknesses" | `!!! warning "Limitations"` |
-| "Strengths" / "Advantages" | `!!! success "Strengths"` |
-| "Why it matters" | `!!! info "Why it matters"` |
-| "Recommendations" | `!!! tip "Recommendations"` |
-| "Not recommended" / "Avoid" | `!!! danger "Not Recommended"` |
-| "Project overview" / metadata | `!!! info "Project Overview"` |
-| Scope / methodology | `!!! info "Scope"` |
-| Disclaimer | `!!! warning "Disclaimer"` |
-| Academic dilemma / case study | `!!! example "Academic Dilemma"` |
-
-### 5.3 ASCII Diagrams
-
-| Current Content | Transform To |
-|----------------|-------------|
-| Box-and-arrow ASCII art | `mermaid flowchart LR/TD` |
-| Sequence-style text | `mermaid sequenceDiagram` |
-| Tree-style hierarchy | `mermaid flowchart TD` |
-
-### 5.4 Parallel/Grouped Content
-
-| Current Content | Transform To |
-|----------------|-------------|
-| Numbered patterns (Pattern 1, 2, 3...) | Content tabs `=== "Pattern 1: Name"` |
-| Multiple models/approaches | Content tabs `=== "Model 1: Name"` |
-| Tier-based lists (Tier 1, 2, 3) | Content tabs `=== "Tier 1: Name"` |
-| Audience-specific sections | Content tabs `=== "For Audience A"` |
-| Language/platform variants | Content tabs `=== "Platform A"` |
-
-### 5.5 Landing/Index Pages
-
-| Current Content | Transform To |
-|----------------|-------------|
-| Plain link lists | Grid cards with icons and descriptions |
-
-### 5.6 Multiple Related Citations/References
-
-| Current Content | Transform To |
-|----------------|-------------|
-| Sequential citation blockquotes | Individual `??? abstract "Citation"` (collapsible) |
+| Blockquote TL;DR / summary | `!!! abstract "TL;DR"` |
+| Blockquote citation | `??? abstract "Citation"` (collapsible) |
+| Blockquote warning | `!!! warning "Title"` |
+| "Key Insights" / "Findings" section | `!!! success "Key Insights"` |
+| "Limitations" / "Weaknesses" section | `!!! warning "Limitations"` |
+| "Recommendations" section | `!!! tip "Recommendations"` |
+| "Avoid" / anti-pattern section | `!!! danger "Not Recommended"` |
+| Numbered patterns (1, 2, 3) | Content tabs `=== "Pattern 1: Name"` |
+| Plain link lists (index pages) | Grid cards with icons |
+| ASCII box-and-arrow art | `mermaid flowchart LR/TD` |
 
 ---
 
-## 6. Workflow — Optimizing a Doc Site
+## 4. Workflow — Optimizing a Doc Site
 
 ### Step 1: Audit
 
-1. List all markdown files and their line counts
-2. Read `mkdocs.yml` to verify required extensions are enabled
-3. Categorize files: index pages, main content, deep-dives, comparisons
+1. List all markdown files and line counts
+2. Read `mkdocs.yml` — check extensions, theme.features, plugins
+3. Check `.gitignore` for `site/`
+4. Identify files lacking front matter (`grep -L '^---$' docs/**/*.md`)
 
-### Step 2: Plan
+### Step 2: Plan by Priority
 
-For each file, scan for optimization opportunities using the Decision Tree (Section 5). Create a numbered transformation list.
+| Priority | Task |
+|----------|------|
+| P0 | Fix mkdocs.yml (features + plugins + Mermaid integration) |
+| P1 | Add front matter to all content pages; fix heading numbering |
+| P2 | Add TL;DR to long pages (>60 lines); fix Grid Card consistency |
+| P3 | Convert blockquotes to admonitions; parallel content to tabs |
 
 ### Step 3: Apply
 
-Apply transformations file by file. For large files (1000+ lines):
-- Work in sections, verifying each transformation
-- Be especially careful with indentation in admonitions and tabs
-- For content tabs with substantial content, double-check blank lines between tabs
+For 10+ file sites, batch by directory (all `ch1/` files together, etc.). Per file: front matter → headings → TL;DR → visual. Edit `mkdocs.yml` and index pages separately.
 
-### Step 4: Verify
+### Step 4: Verify & Deploy
 
-```bash
-mkdocs build --strict  # or just `mkdocs build`
-```
-
-Check for:
-- Build errors (missing extensions, syntax errors)
-- Broken internal links (pre-existing vs. new)
-- Proper rendering of admonitions, tabs, mermaid diagrams
-
-### Step 5: Deploy
-
-```bash
-git add -A
-git commit -m "docs: comprehensive MkDocs Material visual optimization"
-git push origin main
-```
-
-If using GitHub Actions for Pages deployment, the push triggers the build automatically.
+- If mkdocs installed: `mkdocs build --strict`
+- Otherwise: spot-check key files, push to trigger CI build
 
 ---
 
-## 7. Common Pitfalls
+## 5. Common Pitfalls
 
 | Pitfall | Solution |
 |---------|----------|
 | Content not rendered inside admonition | Check 4-space indentation on every line |
-| Tabs not rendering | Ensure `pymdownx.tabbed` with `alternate_style: true` is enabled |
-| Mermaid not rendering | Ensure `pymdownx.superfences` with mermaid `custom_fences` config |
-| Arrow `-->` breaks admonition | Use `--` instead of arrow characters inside admonitions |
-| Collapsible not working | Ensure `pymdownx.details` extension is enabled; use `???` not `!!!` |
-| Grid cards not rendering | Ensure `attr_list` + `md_in_html` enabled; `markdown` attr on div |
-| `!!python/name:` LSP errors | Ignore — valid at MkDocs runtime, editor LSP false positive |
-| Nested tabs in admonitions | Avoid unless necessary; requires 8-space indent, error-prone |
-| Empty admonition | Must have at least one line of indented content (even a blank comment) |
-| Tab content missing | Blank line required between last line of tab content and next `===` |
+| Tabs not rendering | Ensure `pymdownx.tabbed` with `alternate_style: true` |
+| Mermaid not rendering | Ensure `pymdownx.superfences` with mermaid custom_fences |
+| Emoji in Mermaid nodes | Remove emoji; use plain text labels only |
+| `<b>` / HTML in Mermaid nodes | Remove HTML; shorten labels or use surrounding text |
+| Arrow `→` breaks admonition | Use `--` or `-->` instead of the unicode arrow |
+| Collapsible not working | Use `???` not `!!!`; ensure `pymdownx.details` is enabled |
+| Grid cards not rendering | Ensure `attr_list` + `md_in_html`; `markdown` attr on div |
+| Grid card icons inconsistent size | Always use `{ .lg .middle }` modifier on icons |
+| Missing front matter | Page title defaults to filename; tags don't work |
+| Heading numbers from doc splitting | Compare filename number against H2/H3 numbers; remove mismatches |
+| `site/` committed to git | Add `site/` to `.gitignore` |
+| `!!python/name:` LSP errors | Ignore — valid MkDocs syntax, editor false positive |
+| TL;DR placed after existing admonitions | Place `!!! abstract` immediately after H1, before other admonitions |
+| No previous/next links at page bottom | Add `navigation.footer` to theme.features |
+| No breadcrumb for deep nesting | Add `navigation.path` to theme.features |
+| **Mermaid colors/backgrounds won't change** | Material shadow DOM overrides all theme settings. `%%{init}%%` and `extra.css` are ineffective. Use custom integration (`class: mermaid-custom` + `mermaid.mjs`). See [Section 2.3](#23-mermaid-diagrams--custom-theming) and [mermaid-reference.md](mermaid-reference.md) |
+| Mermaid diagram has no value | If ≤4 linear nodes and text says the same thing, **delete the diagram**. "简洁" means clean styling, not stripping information |
 
 ---
 
-## 8. Quick Reference — Copy-Paste Templates
+## 6. Quick Reference — Copy-Paste Templates
+
+### Front Matter
+```yaml
+---
+title: Page Title Here
+description: One-sentence summary of this page.
+tags:
+  - Tag1
+  - Tag2
+---
+```
 
 ### Admonition (standard)
 ```markdown
@@ -369,35 +472,12 @@ If using GitHub Actions for Pages deployment, the push triggers the build automa
     Citation details here.
 ```
 
-### Content Tabs
-```markdown
-=== "Option A"
-    Content for A.
+### Other Templates
 
-=== "Option B"
-    Content for B.
-```
+**TL;DR**: `!!! abstract "本节摘要"` with 4-space indented content.
 
-### Mermaid Flowchart
-````markdown
-```mermaid
-flowchart LR
-    A[Input] --> B[Process]
-    B --> C[Output]
-```
-````
+**Tabs**: `=== "Option A"` / `=== "Option B"` with 4-space indented content.
 
-### Grid Cards
-```markdown
-<div class="grid cards" markdown>
+**Mermaid**: Node shapes: `[...]` rect, `([...])` stadium, `{...}` diamond. For custom theming, see [mermaid-reference.md](mermaid-reference.md).
 
-- :material-file-document: **Title**
-
-    ---
-
-    Description.
-
-    [:octicons-arrow-right-24: Read more](./page.md)
-
-</div>
-```
+**Grid Cards**: Use `{ .lg .middle }` on icons. Requires `attr_list` + `md_in_html`.
